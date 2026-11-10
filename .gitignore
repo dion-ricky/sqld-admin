@@ -1,0 +1,12 @@
+# Local sqld data
+/data/
+
+# sqld JWT signing material
+/secrets/
+
+# Local environment and dependencies
+.env
+node_modules/
+
+# PBA loop state
+.pba/

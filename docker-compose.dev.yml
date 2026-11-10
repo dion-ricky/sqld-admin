@@ -1,0 +1,18 @@
+services:
+  sqld:
+    image: ghcr.io/tursodatabase/libsql-server:latest
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    command:
+      # The image entrypoint only injects its default flags when the first
+      # argument is /bin/sqld.
+      - /bin/sqld
+      - --enable-namespaces
+      - --http-listen-addr=0.0.0.0:8080
+      - --admin-listen-addr=0.0.0.0:8081
+      - --disable-default-namespace
+    environment:
+      SQLD_DB_PATH: /var/lib/sqld
+    volumes:
+      - ./.data:/var/lib/sqld

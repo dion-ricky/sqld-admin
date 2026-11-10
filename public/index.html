@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>sqld-admin</title>
+  <meta name="color-scheme" content="light dark">
+  <link rel="preload" href="/fonts/recursive-latin-var.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="error-banner" role="alert" aria-atomic="true"></div>
+
+  <header class="masthead">
+    <a class="wordmark" href="#/" aria-label="sqld admin home">
+      <span class="wordmark-sqld">sqld</span><span class="wordmark-slash" aria-hidden="true">/</span><span class="wordmark-admin">admin</span>
+    </a>
+    <nav class="masthead-nav" aria-label="Primary">
+      <a href="#/" aria-current="page">Databases</a>
+      <a href="#/auth">Auth</a>
+    </nav>
+  </header>
+
+  <main id="content">
+    <p>Navigate to a page to view content.</p>
+  </main>
+
+  <!-- New Database Dialog -->
+  <dialog id="new-database-dialog" aria-labelledby="new-database-title">
+    <div class="dialog-head">
+      <h2 id="new-database-title">New database</h2>
+      <button type="button" class="dialog-close" aria-label="Close dialog">×</button>
+    </div>
+    <form id="new-database-form">
+      <div class="field">
+        <label for="new-database-name">Database name</label>
+        <input type="text" id="new-database-name" required>
+        <p class="field-hint">Lowercase letters, numbers, and hyphens. Up to 63 characters.</p>
+      </div>
+    </form>
+    <div class="dialog-actions">
+      <button type="button" class="btn-secondary cancel-btn">Cancel</button>
+      <button type="submit" form="new-database-form" class="btn-primary">Create</button>
+    </div>
+  </dialog>
+
+  <!-- Adopt Database Dialog -->
+  <dialog id="adopt-dialog" aria-labelledby="adopt-title">
+    <div class="dialog-head">
+      <h2 id="adopt-title">Add existing database</h2>
+      <button type="button" class="dialog-close" aria-label="Close dialog">×</button>
+    </div>
+    <form id="adopt-form">
+      <div class="field">
+        <label for="adopt-database-name">Existing database name</label>
+        <input type="text" id="adopt-database-name" required>
+        <p class="field-hint">Lowercase letters, numbers, and hyphens. Up to 63 characters.</p>
+      </div>
+    </form>
+    <div class="dialog-actions">
+      <button type="button" class="btn-secondary cancel-btn">Cancel</button>
+      <button type="submit" form="adopt-form" class="btn-primary">Add database</button>
+    </div>
+  </dialog>
+
+  <!-- Rename Database Dialog -->
+  <dialog id="rename-database-dialog" aria-labelledby="rename-database-title">
+    <div class="dialog-head">
+      <h2 id="rename-database-title">Rename database</h2>
+      <button type="button" class="dialog-close" aria-label="Close dialog">×</button>
+    </div>
+    <form id="rename-database-form">
+      <p><strong>Current name:</strong> <span id="rename-current-name"></span></p>
+      <div class="field">
+        <label for="rename-new-name">New database name</label>
+        <input type="text" id="rename-new-name" required>
+        <p class="field-hint">Lowercase letters, numbers, and hyphens. Up to 63 characters.</p>
+      </div>
+    </form>
+    <div class="dialog-actions">
+      <button type="button" class="btn-secondary cancel-btn">Cancel</button>
+      <button type="submit" form="rename-database-form" class="btn-primary">Rename</button>
+    </div>
+  </dialog>
+
+  <!-- Duplicate Database Dialog -->
+  <dialog id="duplicate-database-dialog" aria-labelledby="duplicate-database-title">
+    <div class="dialog-head">
+      <h2 id="duplicate-database-title">Duplicate database</h2>
+      <button type="button" class="dialog-close" aria-label="Close dialog">×</button>
+    </div>
+    <form id="duplicate-database-form">
+      <p><strong>Current name:</strong> <span id="duplicate-current-name"></span></p>
+      <div class="field">
+        <label for="duplicate-new-name">New database name</label>
+        <input type="text" id="duplicate-new-name" required>
+        <p class="field-hint">Lowercase letters, numbers, and hyphens. Up to 63 characters.</p>
+      </div>
+    </form>
+    <div class="dialog-actions">
+      <button type="button" class="btn-secondary cancel-btn">Cancel</button>
+      <button type="submit" form="duplicate-database-form" class="btn-primary">Duplicate</button>
+    </div>
+  </dialog>
+
+  <!-- Delete Database Dialog -->
+  <dialog id="delete-database-dialog" aria-labelledby="delete-database-title" aria-describedby="delete-database-desc">
+    <div class="dialog-head">
+      <h2 id="delete-database-title">Delete database</h2>
+      <button type="button" class="dialog-close" aria-label="Close dialog">×</button>
+    </div>
+    <p id="delete-database-desc" class="danger-note">This permanently deletes "<span id="delete-database-name"></span>" and every table in it.</p>
+    <form id="delete-database-form">
+      <div class="field">
+        <label for="delete-confirm-name">Database name</label>
+        <input type="text" id="delete-confirm-name" required placeholder="Type database name here">
+        <p class="field-hint" id="delete-confirm-hint"></p>
+      </div>
+    </form>
+    <div class="dialog-actions">
+      <button type="button" class="btn-secondary cancel-btn">Cancel</button>
+      <button type="submit" form="delete-database-form" id="delete-database-confirm" class="btn-danger-solid" disabled>Delete database</button>
+    </div>
+  </dialog>
+
+  <!-- New Table Dialog -->
+  <dialog id="new-table-dialog" aria-labelledby="new-table-title">
+    <div class="dialog-head">
+      <h2 id="new-table-title">New table</h2>
+      <button type="button" class="dialog-close" aria-label="Close dialog">×</button>
+    </div>
+    <form id="new-table-form">
+      <div class="field">
+        <label for="new-table-name">Table name</label>
+        <input type="text" id="new-table-name" required>
+        <p class="field-hint">Letters, numbers, and underscores. Start with a letter or underscore. Up to 64 characters.</p>
+      </div>
+      <div id="columns-container">
+        <h3>Columns</h3>
+        <div class="columns-list">
+          <div class="column-row">
+            <div class="field field-name">
+              <label for="new-table-column-1-name">Name</label>
+              <input type="text" id="new-table-column-1-name" class="column-name" required>
+            </div>
+            <div class="field">
+              <label for="new-table-column-1-type">Type</label>
+              <select class="column-type" id="new-table-column-1-type">
+                <option value="INTEGER">INTEGER</option>
+                <option value="TEXT">TEXT</option>
+                <option value="REAL">REAL</option>
+                <option value="BLOB">BLOB</option>
+                <option value="NUMERIC">NUMERIC</option>
+              </select>
+            </div>
+            <div class="field field-check"><label><input type="checkbox" class="column-pk"> PK</label></div>
+            <div class="field field-check"><label><input type="checkbox" class="column-notnull"> Not null</label></div>
+            <div class="field field-default">
+              <label for="new-table-column-1-default">Default</label>
+              <input type="text" id="new-table-column-1-default" class="column-default">
+            </div>
+            <button type="button" class="btn-danger btn-sm remove-column">Remove</button>
+          </div>
+        </div>
+        <p class="field-hint">Default value is a SQL literal: 'active', 0, or CURRENT_TIMESTAMP.</p>
+        <button type="button" class="btn-secondary" id="add-column-btn">Add column</button>
+      </div>
+    </form>
+    <div class="dialog-actions">
+      <button type="button" class="btn-secondary cancel-btn">Cancel</button>
+      <button type="submit" form="new-table-form" class="btn-primary">Create</button>
+    </div>
+  </dialog>
+
+  <!-- Add Column Dialog -->
+  <dialog id="add-column-dialog" aria-labelledby="add-column-title">
+    <div class="dialog-head">
+      <h2 id="add-column-title">Add column</h2>
+      <button type="button" class="dialog-close" aria-label="Close dialog">×</button>
+    </div>
+    <form id="add-column-form">
+      <div class="field">
+        <label for="add-column-name">Column name</label>
+        <input type="text" id="add-column-name" required>
+      </div>
+      <div class="field">
+        <label for="add-column-type">Type</label>
+        <select id="add-column-type">
+          <option value="INTEGER">INTEGER</option>
+          <option value="TEXT">TEXT</option>
+          <option value="REAL">REAL</option>
+          <option value="BLOB">BLOB</option>
+          <option value="NUMERIC">NUMERIC</option>
+        </select>
+      </div>
+      <div class="field field-check">
+        <label><input type="checkbox" id="add-column-notnull"> Not null</label>
+      </div>
+      <div class="field">
+        <label for="add-column-default">Default value</label>
+        <input type="text" id="add-column-default" placeholder="Default value">
+        <p class="field-hint">Default value is a SQL literal: 'active', 0, or CURRENT_TIMESTAMP.</p>
+      </div>
+    </form>
+    <div class="dialog-actions">
+      <button type="button" class="btn-secondary cancel-btn">Cancel</button>
+      <button type="submit" form="add-column-form" class="btn-primary">Add column</button>
+    </div>
+  </dialog>
+
+  <!-- Rename Table Dialog -->
+  <dialog id="rename-table-dialog" aria-labelledby="rename-table-title">
+    <div class="dialog-head">
+      <h2 id="rename-table-title">Rename table</h2>
+      <button type="button" class="dialog-close" aria-label="Close dialog">×</button>
+    </div>
+    <form id="rename-table-form">
+      <p><strong>Current name:</strong> <span id="rename-table-current-name"></span></p>
+      <div class="field">
+        <label for="rename-table-new-name">New table name</label>
+        <input type="text" id="rename-table-new-name" required>
+        <p class="field-hint">Letters, numbers, and underscores. Start with a letter or underscore. Up to 64 characters.</p>
+      </div>
+    </form>
+    <div class="dialog-actions">
+      <button type="button" class="btn-secondary cancel-btn">Cancel</button>
+      <button type="submit" form="rename-table-form" class="btn-primary">Rename</button>
+    </div>
+  </dialog>
+
+  <!-- Drop Table Dialog -->
+  <dialog id="drop-table-dialog" aria-labelledby="drop-table-title" aria-describedby="drop-table-desc">
+    <div class="dialog-head">
+      <h2 id="drop-table-title">Drop table</h2>
+      <button type="button" class="dialog-close" aria-label="Close dialog">×</button>
+    </div>
+    <p id="drop-table-desc" class="danger-note">This permanently drops "<span id="drop-table-name"></span>" and every row in it.</p>
+    <form id="drop-table-form">
+      <div class="field">
+        <label for="drop-table-confirm-name">Table name</label>
+        <input type="text" id="drop-table-confirm-name" required placeholder="Type table name here">
+        <p class="field-hint" id="drop-table-confirm-hint"></p>
+      </div>
+    </form>
+    <div class="dialog-actions">
+      <button type="button" class="btn-secondary cancel-btn">Cancel</button>
+      <button type="submit" form="drop-table-form" id="drop-table-confirm" class="btn-danger-solid" disabled>Drop table</button>
+    </div>
+  </dialog>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

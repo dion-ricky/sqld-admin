@@ -1,0 +1,13 @@
+{
+  "name": "sqld-client",
+  "version": "0.0.1",
+  "description": "SQLite over HTTP proxy client and admin API",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "test": "ALLOW_NO_AUTH=true node --test",
+    "auth:generate": "node scripts/generate-sqld-auth.mjs"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
