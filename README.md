@@ -47,7 +47,9 @@ stay on the server.
 
    This builds the app image from `Dockerfile` and starts it with the `sqld`
    service on the compose network. The app is published on port 3000; sqld's
-   user and admin ports are published on 18080/18081 for debugging.
+   user and admin ports are published on 18080/18081 for debugging. All three
+   host ports can be changed in `.env` (`PORT`, `SQLD_HTTP_PORT`,
+   `SQLD_ADMIN_PORT`).
 
 3. Open <http://localhost:3000>. The browser prompts for the HTTP Basic
    credentials from `ADMIN_USER` / `ADMIN_PASSWORD` (or use `ALLOW_NO_AUTH=true`
@@ -68,6 +70,8 @@ SQLD_ADMIN_URL=http://127.0.0.1:18081 \
 node --env-file-if-exists=.env server.js
 ```
 
+Use the ports from `SQLD_HTTP_PORT` / `SQLD_ADMIN_PORT` if you changed them.
+
 Stop that sqld service with `docker compose stop sqld`.
 
 To use the alternate `docker-compose.dev.yml` (ports 8080/8081) instead, start
@@ -85,8 +89,10 @@ node --env-file=.env server.js
 
 | Variable | Default | Description |
 | --- | --- | --- |
-| `PORT` | `3000` | Port the admin app listens on. |
+| `PORT` | `3000` | Port the admin app listens on, and the host port Compose publishes. |
 | `HOST` | `0.0.0.0` | Interface the admin app binds to. |
+| `SQLD_HTTP_PORT` | `18080` | Host port Compose publishes for the sqld user API (container port stays `8080`). |
+| `SQLD_ADMIN_PORT` | `18081` | Host port Compose publishes for the sqld admin API (container port stays `8082`). |
 | `SQLD_URL` | `http://sqld:8080` | sqld user (SQL) endpoint. Host-run development uses `http://127.0.0.1:18080`; `http://sqld:8080` is for container networking. |
 | `SQLD_ADMIN_URL` | `http://sqld:8081` | sqld admin (namespace management) endpoint. Host-run development uses `http://127.0.0.1:18081`. |
 | `SQLD_HOST_SUFFIX` | `local` | Suffix for the per-namespace `Host` header: `<ns>.<SQLD_HOST_SUFFIX>`. |
@@ -125,7 +131,7 @@ environment to exercise 401 and fail-fast behavior.
 `docker-compose.yml` includes both services:
 
 - `app` — built from `Dockerfile`, containing `server.js`, `lib/`, and the
-  static frontend in `public/`; published on port 3000.
+  static frontend in `public/`; published on `PORT` (default 3000).
 - `sqld` — the libsql server in namespace mode, with its data bind-mounted
   from `./data`.
 
@@ -138,8 +144,9 @@ docker compose up -d --build
 The app container connects to `sqld` over the compose network at
 `http://sqld:8080` (user API) and `http://sqld:8082` (admin API). The compose
 file overrides `SQLD_ADMIN_URL` to port 8082 because that is where the `sqld`
-service listens for admin requests. Change the published host ports in
-`docker-compose.yml` if 3000/18080/18081 are already in use.
+service listens for admin requests. To avoid host port conflicts, set `PORT`,
+`SQLD_HTTP_PORT` and `SQLD_ADMIN_PORT` in `.env`; only the host-published side
+of each mapping changes.
 
 sqld authentication is enabled in the compose stack:
 

@@ -9,10 +9,14 @@
 #   npm run auth:generate  # creates secrets/ and fills the sqld tokens
 #   docker compose up -d --build
 #
-# Then open:
+# Then open (assuming the default host ports below):
 #   Admin UI:      http://localhost:3000
 #   HTTP user API: http://localhost:18080
 #   Admin API:     http://localhost:18081
+#
+# Host ports are configurable from .env: PORT (admin UI), SQLD_HTTP_PORT
+# (sqld user API) and SQLD_ADMIN_PORT (sqld admin API). Only the host side of
+# each mapping changes; the container ports stay fixed at 3000, 8080 and 8082.
 #
 # The app service builds the same image as `docker build .` (Node server plus
 # the static frontend in public/) and reaches sqld over the compose network.
@@ -26,8 +30,9 @@
 # SQLD_ADMIN_URL=http://sqld:8081 (container networking). The app service below
 # overrides the admin URL to 8082 because this compose file runs sqld's admin
 # listener there. When running server.js on the host against this compose file,
-# set SQLD_URL=http://127.0.0.1:18080 and
-# SQLD_ADMIN_URL=http://127.0.0.1:18081.
+# set SQLD_URL=http://127.0.0.1:${SQLD_HTTP_PORT:-18080} and
+# SQLD_ADMIN_URL=http://127.0.0.1:${SQLD_ADMIN_PORT:-18081} (the defaults shown
+# in .env.example).
 
 services:
   app:
@@ -41,9 +46,9 @@ services:
     depends_on:
       - sqld
     ports:
-      - "3000:3000"
+      - "${PORT:-3000}:${PORT:-3000}"
     environment:
-      PORT: "3000"
+      PORT: "${PORT:-3000}"
       HOST: 0.0.0.0
       # Container-network endpoints for the sqld service below.
       SQLD_URL: http://sqld:8080
@@ -67,8 +72,8 @@ services:
     container_name: sqld
     restart: unless-stopped
     ports:
-      - "18080:8080"  # HTTP endpoint (user API)
-      - "18081:8082"  # Admin API endpoint (namespace management)
+      - "${SQLD_HTTP_PORT:-18080}:8080"  # HTTP endpoint (user API)
+      - "${SQLD_ADMIN_PORT:-18081}:8082"  # Admin API endpoint (namespace management)
     environment:
       # The image's entrypoint injects --db-path and --http-listen-addr from
       # these variables, so do not also pass them under `command`.
